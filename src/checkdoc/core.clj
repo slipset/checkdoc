@@ -82,10 +82,7 @@ See `rules` for what rules are checked."
        (filter identity)))
 
 (comment
-  (all-sentences-end-with-space  "Checks that `doc-string` and `args` adhear to the standards.
-`env` is a map clojure.core/identity that at least contains symbols, which
-is a sequence of known symbols for the var containing
-the docstring. See `rules` for what rules are checked." ["doc-string" "args" "env"] (ns-map 'checkdoc.core))  (all-sentences-end-with-space  "Checks that `doc-string` and `args` adhear to the standards.
+  (checkdoc  "Checks that `doc-string` and `args` adhear to the standards.
 `env` is a map clojure.core/identity that at least contains symbols, which
 is a sequence of known symbols for the var containing
 the docstring. See `rules` for what rules are checked." ["doc-string" "args" "env"] (ns-map 'checkdoc.core))
