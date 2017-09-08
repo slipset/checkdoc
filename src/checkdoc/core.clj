@@ -47,17 +47,25 @@
   (keep #(when-not (re-find (re-pattern (str "`" % "`")) doc-string)
            (str % " is not mentioned in the doc-string")) args))
 
+(defn all-symbols-should-be-quoted [doc-string args {:keys [symbols]}]
+  (let [doc-symbols (keep #(re-find (re-pattern (str "\\b" % "\\b")) doc-string) symbols)]
+    (keep #(when-not (re-find (re-pattern (str "`" % "`")) doc-string)
+           (str % " should be wrapped in ``")) doc-symbols)))
+
 (def rules [no-whitespace-at-start-or-end
             all-sentences-end-with-space
             no-indentation
             first-line-complete-sentence
             all-args-should-be-documented
+            all-symbols-should-be-quoted
             (partial no-wider-than-limit 60)])
 
 (defn checkdoc
   "Checks that `doc-string` and `args` adhear to the standards.
+`env` is a map that at least contains symbols, which is a sequence
+of known symbols for the var containing the docstring.
 See `rules` for what rules are checked."
-  [doc-string args]
+  [doc-string args env]
   (->> rules
-       (mapcat #(% doc-string args))
+       (mapcat #(% doc-string args env))
        (filter identity)))
