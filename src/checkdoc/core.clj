@@ -45,12 +45,12 @@
 
 (defn all-args-should-be-documented [doc-string args]
   (keep #(when-not (re-find (re-pattern (str "`" % "`")) doc-string)
-           (str % " is not mentioned in the doc-string")) args))
+           (str % " is not mentioned or not quoted in the doc-string")) args))
 
 (defn all-symbols-should-be-quoted [doc-string args {:keys [symbols]}]
   (let [doc-symbols (keep #(re-find (re-pattern (str "\\b" % "\\b")) doc-string) symbols)]
     (keep #(when-not (re-find (re-pattern (str "`" % "`")) doc-string)
-           (str % " should be wrapped in ``")) doc-symbols)))
+           (str % " should be quoted with ``")) doc-symbols)))
 
 (def rules [no-whitespace-at-start-or-end
             all-sentences-end-with-space
