@@ -59,7 +59,8 @@
   (let [doc-symbols (->> ns-map
                          vals
                          (map var->str)
-                         (keep #(re-find (re-pattern (str "\\b" % "\\b")) doc-string)))]
+                         (keep #(re-find (re-pattern (str "\\b\\Q" % "\\E\\b")) doc-string)))]
+    (def dc doc-symbols)
     (keep #(when-not (re-find (re-pattern (str "`" % "`")) doc-string)
            (str % " should be quoted with ``")) doc-symbols)))
 
@@ -82,7 +83,7 @@ See `rules` for what rules are checked."
        (filter identity)))
 
 (comment
-  (checkdoc  "Checks that `doc-string` and `args` adhear to the standards.
+  (checkdoc "Checks that `doc-string` and `args` adhear to the standards.
 `env` is a map clojure.core/identity that at least contains symbols, which
 is a sequence of known symbols for the var containing
 the docstring. See `rules` for what rules are checked." ["doc-string" "args" "env"] (ns-map 'checkdoc.core))
