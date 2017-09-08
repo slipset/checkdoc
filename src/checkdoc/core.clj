@@ -1,7 +1,9 @@
 (ns checkdoc.core
   (:require [clojure.string :as str]))
 
-(def punctuation-re #"\.!?")
+;; don't care about punctuation inside backtics, see
+;; https://stackoverflow.com/a/1757107/9422
+(def punctuation-re #"\.!?(?=([^`]*`[^`]*`)*[^`]*$)")
 
 (defn all-sentences-end-with-space [doc-string & _]
   (let [[_ & sentences] (str/split doc-string punctuation-re)]
@@ -43,12 +45,21 @@
             (= \ (last doc-string)))
     ["Don't start or end doc-string with whitespace"]))
 
-(defn all-args-should-be-documented [doc-string args]
+(defn all-args-should-be-documented [doc-string args & _]
   (keep #(when-not (re-find (re-pattern (str "`" % "`")) doc-string)
            (str % " is not mentioned or not quoted in the doc-string")) args))
 
-(defn all-symbols-should-be-quoted [doc-string args {:keys [symbols]}]
-  (let [doc-symbols (keep #(re-find (re-pattern (str "\\b" % "\\b")) doc-string) symbols)]
+(defn var->str [v]
+  (let [vs (str v)]
+    (if (str/starts-with? vs "#'")
+      (.substring vs 2)
+      vs)))
+
+(defn all-symbols-should-be-quoted [doc-string args ns-map]
+  (let [doc-symbols (->> ns-map
+                         vals
+                         (map var->str)
+                         (keep #(re-find (re-pattern (str "\\b" % "\\b")) doc-string)))]
     (keep #(when-not (re-find (re-pattern (str "`" % "`")) doc-string)
            (str % " should be quoted with ``")) doc-symbols)))
 
@@ -62,10 +73,20 @@
 
 (defn checkdoc
   "Checks that `doc-string` and `args` adhear to the standards.
-`env` is a map that at least contains symbols, which is a sequence
-of known symbols for the var containing the docstring.
+`env` is a map that at least contains symbols, which is
+a sequence of known symbols for the var containing the docstring.
 See `rules` for what rules are checked."
-  [doc-string args env]
+  [doc-string args ns-map]
   (->> rules
-       (mapcat #(% doc-string args env))
+       (mapcat #(% doc-string args ns-map))
        (filter identity)))
+
+(comment
+  (all-sentences-end-with-space  "Checks that `doc-string` and `args` adhear to the standards.
+`env` is a map clojure.core/identity that at least contains symbols, which
+is a sequence of known symbols for the var containing
+the docstring. See `rules` for what rules are checked." ["doc-string" "args" "env"] (ns-map 'checkdoc.core))  (all-sentences-end-with-space  "Checks that `doc-string` and `args` adhear to the standards.
+`env` is a map clojure.core/identity that at least contains symbols, which
+is a sequence of known symbols for the var containing
+the docstring. See `rules` for what rules are checked." ["doc-string" "args" "env"] (ns-map 'checkdoc.core))
+  )
