@@ -51,9 +51,10 @@
 
 (defn var->str [v]
   (let [vs (str v)]
-    (if (str/starts-with? vs "#'")
-      (.substring vs 2)
-      vs)))
+    (cond (str/starts-with? vs "#'") (.substring vs 2)
+          (str/starts-with? vs "class") (.substring vs 6)
+          (str/starts-with? vs "interface") (.substring vs 10)
+          :else vs)))
 
 (defn all-symbols-should-be-quoted [doc-string args ns-map]
   (let [doc-symbols (->> ns-map
@@ -84,7 +85,7 @@ See `rules` for what rules are checked."
 
 (comment
   (checkdoc "Checks that `doc-string` and `args` adhear to the standards.
-`env` is a map clojure.core/identity that at least contains symbols, which
+`env` is a map clojure.core/identity clojure.lang.Compiler that at least contains symbols, which
 is a sequence of known symbols for the var containing
 the docstring. See `rules` for what rules are checked." ["doc-string" "args" "env"] (ns-map 'checkdoc.core))
   )
