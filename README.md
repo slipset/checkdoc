@@ -5,10 +5,10 @@ A Clojure library designed to check that doc-strings are up to par
 ## Usage
 
 ```Clojure
-checkdoc.core> (checkdoc "This is a docstring." [])
+checkdoc.core> (checkdoc "This is a docstring." [] (ns-map 'checkdoc.core))
 ;; => ()
 
-checkdoc.core> (checkdoc "This is a docstring" [])
+checkdoc.core> (checkdoc "This is a docstring" [] (ns-map 'checkdoc.core)))
 ;; => ("First line should end in punctuation")
 ```
 
